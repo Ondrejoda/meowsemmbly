@@ -1,2 +1,2 @@
-gcc -o parser parser.c
-./parser
+gcc -o compiled/parser parser.c
+./compiled/parser

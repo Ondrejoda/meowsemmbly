@@ -1,2 +1,2 @@
-gcc -o executor executor.c
-./executor
+gcc -o compiled/executor executor.c
+./compiled/executor
