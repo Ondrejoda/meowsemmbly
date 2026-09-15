@@ -10,7 +10,9 @@ with open("test.meow", "r") as file:
 
         instr = 0
 
-        if opcode in [1, 2, 3]:
+        if opcode == 1: # OP_JUMP
+            instr = (opcode << 24) | (int(keys[1]) & 0xFFFFFF)
+        elif opcode in [2, 3]: # OP_PNUM, OP_PCHR
             instr = (opcode << 24) | (int(keys[1]) << 16)
         elif opcode in [0, 4]:
             instr = (opcode << 24) | (int(keys[1]) << 16) | int(keys[2])
