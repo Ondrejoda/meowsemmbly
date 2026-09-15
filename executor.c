@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-const int VERBOSE = 1;
+const int VERBOSE = 0;
 
 enum opcodes {
     OP_LOAD,
@@ -57,10 +57,11 @@ int execute_opcode(uint32_t code) {
         if (VERBOSE) {printf("OP_SWAP\n");}
         reg1 = (code >> 16) & 0xFF;
         reg2 = (code >> 8) & 0xFF;
+        if (VERBOSE) {printf("BEFORE reg1: %d  reg2: %d\n", reg1, reg2);};
         val = registers[reg1];
         registers[reg1] = registers[reg2];
         registers[reg2] = val;
-        if (VERBOSE) {printf("reg1: %d  reg2: %d\n", reg1, reg2);};
+        if (VERBOSE) {printf("AFTER reg1: %d  reg2: %d\n", reg1, reg2);};
         code_index++;
         return 0;
     case OP_ADD:

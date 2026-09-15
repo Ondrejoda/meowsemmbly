@@ -6,6 +6,8 @@ with open("test.meow", "r") as file:
     for line in file:
         res = ""
         keys = line.split("\n")[0].split(" ")
+        if "//" in keys[0]:
+            continue
         opcode = int(opcodes.index(keys[0]))
 
         instr = 0
@@ -14,8 +16,12 @@ with open("test.meow", "r") as file:
             instr = (opcode << 24) | (int(keys[1]) & 0xFFFFFF)
         elif opcode in [2, 3]: # OP_PNUM, OP_PCHR
             instr = (opcode << 24) | (int(keys[1]) << 16)
-        elif opcode in [0, 4]:
+        elif opcode == 0:
             instr = (opcode << 24) | (int(keys[1]) << 16) | int(keys[2])
+        elif opcode == 4:
+            print(keys)
+            instr = (opcode << 24) | (int(keys[1]) << 16) | (int(keys[2]) << 8)
+            print(f"SWAP hex: {hex(instr)}")
         elif opcode in [5, 6, 7]:
             instr = (opcode << 24) | (int(keys[1]) << 16) | (int(keys[2]) << 8) | int(keys[3])
         elif opcode == 8:
