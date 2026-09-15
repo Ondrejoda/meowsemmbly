@@ -11,14 +11,15 @@ enum opcodes {
     OP_SWAP,
     OP_ADD,
     OP_SUB,
-    OP_MUL
+    OP_MUL,
+    OP_END
 };
 
 int registers[256];
 
-int code_index = -1;
+int code_index = 0;
 
-void execute_opcode(uint32_t code) {
+int execute_opcode(uint32_t code) {
     int opcode = (code >> 24) & 0xFF;
     int reg1;
     int reg2;
@@ -33,25 +34,25 @@ void execute_opcode(uint32_t code) {
         registers[reg1] = val;
         if (VERBOSE) {printf("reg: %d  value: %d\n", reg1, val);};
         code_index++;
-        break;
+        return 0;
     case OP_JUMP:
         if (VERBOSE) {printf("OP_JUMP\n");}
         val = code & 0xFFFFFF;
         if (VERBOSE) {printf("jumping to: %d\n", val);}
         code_index = val;
-        break;
+        return 0;
     case OP_PNUM:
         if (VERBOSE) {printf("OP_PNUM\n");}
         reg1 = (code >> 16) & 0xFF;
         printf("%d\n", registers[reg1]);
         code_index++;
-        break;
+        return 0;
     case OP_PCHR:
         if (VERBOSE) {printf("OP_PCHR\n");}
         reg1 = (code >> 16) & 0xFF;
         printf("%c\n", registers[reg1]);
         code_index++;
-        break;
+        return 0;
     case OP_SWAP:
         if (VERBOSE) {printf("OP_SWAP\n");}
         reg1 = (code >> 16) & 0xFF;
@@ -61,7 +62,7 @@ void execute_opcode(uint32_t code) {
         registers[reg2] = val;
         if (VERBOSE) {printf("reg1: %d  reg2: %d\n", reg1, reg2);};
         code_index++;
-        break;
+        return 0;
     case OP_ADD:
         if (VERBOSE) {printf("OP_ADD\n");}
         reg1 = (code >> 16) & 0xFF;
@@ -71,7 +72,7 @@ void execute_opcode(uint32_t code) {
         registers[reg3] = val;
         if (VERBOSE) {printf("reg1: %d  reg2: %d reg3: %d result: %d\n", reg1, reg2, reg3, val);};
         code_index++;
-        break;
+        return 0;
     case OP_SUB:
         if (VERBOSE) {printf("OP_SUB\n");}
         reg1 = (code >> 16) & 0xFF;
@@ -81,7 +82,7 @@ void execute_opcode(uint32_t code) {
         registers[reg3] = val;
         if (VERBOSE) {printf("reg1: %d  reg2: %d reg3: %d result: %d\n", reg1, reg2, reg3, val);};
         code_index++;
-        break;
+        return 0;
     case OP_MUL:
         if (VERBOSE) {printf("OP_MUL\n");}
         reg1 = (code >> 16) & 0xFF;
@@ -91,23 +92,33 @@ void execute_opcode(uint32_t code) {
         registers[reg3] = val;
         if (VERBOSE) {printf("reg1: %d  reg2: %d reg3: %d result: %d\n", reg1, reg2, reg3, val);};
         code_index++;
-        break;
+        return 0;
+    case OP_END:
+        if (VERBOSE) {printf("OP_END\n");}
+        return 1;
     default:
-        break;
+        return 0;
     }
 }
 
 
 int main() {
-    uint32_t code[5];
-//              aaaaaaaabbbbbbbbccccccccdddddddd
-    code[0] = 0b00000000000000010000000000000111;
-    code[1] = 0b00000000000000100000000000000110;
-    code[2] = 0b00000111000000010000001000000000;
-    code[3] = 0b00000010000000000000000000000000;
-    while (code_index < 4)
+    FILE *file;
+    file = fopen("test.mbin", "rb");
+    fseek(file, 0, SEEK_END);
+    int size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    uint32_t code[size / 4];
+
+    fread(code, 4, size / 4, file);
+    fclose(file);
+
+
+    int stop = 0;
+    while (!stop)
     {
-        execute_opcode(code[code_index]);
+        stop = execute_opcode(code[code_index]);
     }
     
     return 0;
