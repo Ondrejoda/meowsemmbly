@@ -5,7 +5,7 @@ result = []
 with open("test.meow", "r") as file:
     for line in file:
         res = ""
-        keys = line.split("\n")[0].split(" ")
+        keys = line.strip().split("\n")[0].split(" ")
 
         if "//" in keys[0] or keys[0] == "":
             opcode = 10
