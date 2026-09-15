@@ -12,7 +12,9 @@ enum opcodes {
     OP_ADD,
     OP_SUB,
     OP_MUL,
-    OP_END
+    OP_END,
+    OP_IJMP,
+    OP_OMIT
 };
 
 int registers[256];
@@ -37,7 +39,8 @@ int execute_opcode(uint32_t code) {
         return 0;
     case OP_JUMP:
         if (VERBOSE) {printf("OP_JUMP\n");}
-        val = code & 0xFFFFFF;
+        reg1 = (code >> 16) & 0xFF;
+        val = registers[reg1];
         if (VERBOSE) {printf("jumping to: %d\n", val);}
         code_index = val;
         return 0;
@@ -97,6 +100,23 @@ int execute_opcode(uint32_t code) {
     case OP_END:
         if (VERBOSE) {printf("OP_END\n");}
         return 1;
+    case OP_IJMP:
+        if (VERBOSE) {printf("OP_IJMP\n");}
+        reg1 = (code >> 16) & 0xFF;
+        reg2 = (code >> 8) & 0xFF;
+        reg3 = code & 0xFF;
+        val = registers[reg3];
+        if (registers[reg1] == registers[reg2]) {
+            code_index = val;
+            if (VERBOSE) {printf("jumping to: %d\n", val);}
+        } else {
+            code_index++;
+            if (VERBOSE) {printf("not jumping");}
+        }
+        return 0;
+    case OP_OMIT:
+        code_index++;
+        return 0;
     default:
         return 0;
     }

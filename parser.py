@@ -1,4 +1,4 @@
-opcodes = ["OP_LOAD", "OP_JUMP", "OP_PNUM", "OP_PCHR", "OP_SWAP", "OP_ADD", "OP_SUB", "OP_MUL", "OP_END"]
+opcodes = ["OP_LOAD", "OP_JUMP", "OP_PNUM", "OP_PCHR", "OP_SWAP", "OP_ADD", "OP_SUB", "OP_MUL", "OP_END", "OP_IJMP", "OP_OMIT"]
 
 result = []
 
@@ -6,25 +6,22 @@ with open("test.meow", "r") as file:
     for line in file:
         res = ""
         keys = line.split("\n")[0].split(" ")
-        if "//" in keys[0]:
-            continue
-        opcode = int(opcodes.index(keys[0]))
+
+        if "//" in keys[0] or keys[0] == "":
+            opcode = 10
+        else:
+            opcode = int(opcodes.index(keys[0]))
 
         instr = 0
-
-        if opcode == 1: # OP_JUMP
-            instr = (opcode << 24) | (int(keys[1]) & 0xFFFFFF)
-        elif opcode in [2, 3]: # OP_PNUM, OP_PCHR
+        if opcode in [1, 2, 3]: # OP_PNUM, OP_PCHR
             instr = (opcode << 24) | (int(keys[1]) << 16)
         elif opcode == 0:
             instr = (opcode << 24) | (int(keys[1]) << 16) | int(keys[2])
         elif opcode == 4:
-            print(keys)
             instr = (opcode << 24) | (int(keys[1]) << 16) | (int(keys[2]) << 8)
-            print(f"SWAP hex: {hex(instr)}")
-        elif opcode in [5, 6, 7]:
+        elif opcode in [5, 6, 7, 9]:
             instr = (opcode << 24) | (int(keys[1]) << 16) | (int(keys[2]) << 8) | int(keys[3])
-        elif opcode == 8:
+        elif opcode in [8, 10]:
             instr = (opcode << 24)
 
         result.append(instr.to_bytes(4, byteorder="little"))
