@@ -8,7 +8,8 @@
 
 ## opcodes
 
-- all opcodes with the exception of LOAD use registries
+- most opcodes use registries for operations
+- the exc
 
 ## list of opcodes
 

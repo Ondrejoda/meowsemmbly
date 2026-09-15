@@ -1,21 +1,82 @@
-// data defining
-LOAD 0 0
-LOAD 1 1
-LOAD 10 0
-LOAD 11 1
-LOAD 100 20
+// numbers loaded
+LOAD 1 2
+LOAD 2 5
+LOAD 3 4
+LOAD 4 3
+LOAD 5 1
+LOAD 6 9
+LOAD 7 7
+LOAD 8 10
+LOAD 9 8
+LOAD 10 6
+
+// loop values
+LOAD 100 1
+LOAD 110 1
+
+// temp storage reg locations
+LOAD 200 210
+LOAD 201 211
 
 // main loop
+
 : main
-ADD 0 1 2
-SWAP 0 1
-SWAP 1 2
-PNUM 0
-NLIN
-ADD 10 11 10
-IJMP 10 100 end 
+
+// load two values based on index to temp area
+PSWP 100 200
+ADD 100 .1 100
+PSWP 100 201
+SUB 100 .1 100
+
+// if right is greater, skip
+GJMP 211 210 mid_swap
+
+// swap them back swapped
+PSWP 100 201
+ADD 100 .1 100
+PSWP 100 200
+SUB 100 .1 100
+JUMP post_swap
+
+// swap them back normally
+
+: mid_swap
+
+PSWP 100 200
+ADD 100 .1 100
+PSWP 100 201
+SUB 100 .1 100
+
+: post_swap
+
+// increment loops
+ADD 100 .1 100
+IJMP 100 .10 increment_loop
+
 JUMP main
 
-// end op
+// progress second loop
+
+: increment_loop
+
+LOAD 100 1
+ADD 110 .1 110
+IJMP 110 .10 end
+JUMP main
+
+// end setup
+
 : end
+
+PNUM 1
+PNUM 2
+PNUM 3
+PNUM 4
+PNUM 5
+PNUM 6
+PNUM 7
+PNUM 8
+PNUM 9
+PNUM 10
+NLIN
 END

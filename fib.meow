@@ -1,20 +1,27 @@
 // data defining
+
 LOAD 0 0
 LOAD 1 1
 LOAD 10 0
-LOAD 11 1
-LOAD 100 20
-LOAD 50 10
-LOAD 60 19
 
 // main loop
+
+: main
+
 ADD 0 1 2
 SWAP 0 1
 SWAP 1 2
+
 PNUM 0
-ADD 10 11 10
-IJMP 10 100 60 
-JUMP 50
+NLIN
+
+ADD 10 .1 10
+IJMP 10 .10 end
+
+JUMP main
 
 // end op
+
+: end
+NLIN
 END

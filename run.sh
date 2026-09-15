@@ -1,3 +1,3 @@
 python parser.py
-gcc -Wall -Werror -o compiled/executor executor.c
+gcc -o compiled/executor executor.c
 ./compiled/executor

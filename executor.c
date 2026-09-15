@@ -15,11 +15,17 @@ enum opcodes {
     OP_MUL,
     OP_END,
     OP_IJMP,
+    OP_GJMP,
     OP_OMIT,
     OP_PSWP,
-    OP_GJMP,
     OP_NLIN,
-    OP_JPNT
+    OP_JPNT,
+    OP_IADD,
+    OP_ISUB,
+    OP_IMUL,
+    OP_COPY,
+    OP_IIJP,
+    OP_IGJP
 };
 
 int registers[256];
@@ -50,6 +56,7 @@ int execute_opcode(uint32_t code) {
     int reg2;
     int reg3;
     int val;
+    int target;
     switch (opcode)
     {
     case OP_LOAD:
@@ -63,9 +70,9 @@ int execute_opcode(uint32_t code) {
     case OP_JUMP:
         if (VERBOSE) {printf("OP_JUMP\n");}
         reg1 = (code >> 16) & 0xFF;
-        val = jump_points[reg1];
-        if (VERBOSE) {printf("jumping to: %d\n", val);}
-        code_index = val;
+        target = jump_points[reg1];
+        if (VERBOSE) {printf("jumping to: %d\n", target);}
+        code_index = target;
         return 0;
     case OP_PNUM:
         if (VERBOSE) {printf("OP_PNUM\n");}
@@ -131,13 +138,27 @@ int execute_opcode(uint32_t code) {
         reg1 = (code >> 16) & 0xFF;
         reg2 = (code >> 8) & 0xFF;
         reg3 = code & 0xFF;
-        val = jump_points[reg3];
+        target = jump_points[reg3];
         if (registers[reg1] == registers[reg2]) {
-            code_index = val;
-            if (VERBOSE) {printf("jumping to: %d\n", val);}
+            code_index = target;
+            if (VERBOSE) {printf("jumping to: %d\n", target);}
         } else {
             code_index++;
             if (VERBOSE) {printf("not jumping\n");}
+        }
+        return 0;
+    case OP_GJMP:
+        if (VERBOSE) {printf("OP_GJMP\n");}
+        reg1 = (code >> 16) & 0xFF;
+        reg2 = (code >> 8) & 0xFF;
+        reg3 = code & 0xFF;
+        target = jump_points[reg3];
+        if (registers[reg1] > registers[reg2]) {
+            code_index = target;
+            if (VERBOSE) {printf("jumping to: %d\n", target);}
+        } else {
+            code_index++;
+            if (VERBOSE) {printf("not jumping");}
         }
         return 0;
     case OP_OMIT:
@@ -158,20 +179,6 @@ int execute_opcode(uint32_t code) {
         if (VERBOSE) {printf("after values: reg1: %d  reg2: %d\n", registers[reg1], registers[reg2]);};
         code_index++;
         return 0;
-    case OP_GJMP:
-        if (VERBOSE) {printf("OP_GJMP\n");}
-        reg1 = (code >> 16) & 0xFF;
-        reg2 = (code >> 8) & 0xFF;
-        reg3 = code & 0xFF;
-        val = jump_points[reg3];
-        if (registers[reg1] > registers[reg2]) {
-            code_index = val;
-            if (VERBOSE) {printf("jumping to: %d\n", val);}
-        } else {
-            code_index++;
-            if (VERBOSE) {printf("not jumping");}
-        }
-        return 0;
     case OP_NLIN:
         if (VERBOSE) {printf("OP_NLIN\n");}
         printf("\n");
@@ -184,6 +191,73 @@ int execute_opcode(uint32_t code) {
         jump_points[reg1] = val;
         if (VERBOSE) {printf("jpnt: %d  value: %d actual value: %d\n", reg1, val, jump_points[reg1]);};
         code_index++;
+        return 0;
+    case OP_IADD:
+        if (VERBOSE) {printf("OP_ADD\n");}
+        reg1 = (code >> 16) & 0xFF;
+        val = (code >> 8) & 0xFF;
+        reg3 = code & 0xFF;
+        val = registers[reg1] + val;
+        registers[reg3] = val;
+        if (VERBOSE) {printf("reg1: %d  reg2: %d reg3: %d result: %d\n", reg1, reg2, reg3, val);};
+        code_index++;
+        return 0;
+    case OP_ISUB:
+        if (VERBOSE) {printf("OP_SUB\n");}
+        reg1 = (code >> 16) & 0xFF;
+        val = (code >> 8) & 0xFF;
+        reg3 = code & 0xFF;
+        val = registers[reg1] - val;
+        registers[reg3] = val;
+        if (VERBOSE) {printf("reg1: %d  reg2: %d reg3: %d result: %d\n", reg1, reg2, reg3, val);};
+        code_index++;
+        return 0;
+    case OP_IMUL:
+        if (VERBOSE) {printf("OP_MUL\n");}
+        reg1 = (code >> 16) & 0xFF;
+        val = (code >> 8) & 0xFF;
+        reg3 = code & 0xFF;
+        val = registers[reg1] * val;
+        registers[reg3] = val;
+        if (VERBOSE) {printf("reg1: %d  reg2: %d reg3: %d result: %d\n", reg1, reg2, reg3, val);};
+        code_index++;
+        return 0;
+    case OP_COPY:
+        if (VERBOSE) {printf("OP_COPY\n");}
+        reg1 = (code >> 16) & 0xFF;
+        reg2 = (code >> 8) & 0xFF;
+        registers[reg2] = registers[reg1];
+        if (VERBOSE) {printf("COPIED reg1: %d  reg2: %d\n", reg1, reg2);};
+        code_index++;
+        return 0;
+    case OP_IIJP:
+        if (VERBOSE) {printf("OP_IIJP\n");}
+        reg1 = (code >> 16) & 0xFF;
+        val = (code >> 8) & 0xFF;
+        reg2 = code & 0xFF;
+        target = jump_points[reg2];
+        if (VERBOSE) {printf("ii reg1: %d val: %d reg2: %d target: %d\n", registers[reg1], val, reg2, target);}
+        if (registers[reg1] == val) {
+            code_index = target;
+            if (VERBOSE) {printf("jumping to: %d\n", target);}
+        } else {
+            code_index++;
+            if (VERBOSE) {printf("not jumping\n");}
+        }
+        return 0;
+    case OP_IGJP:
+        if (VERBOSE) {printf("OP_IGJP\n");}
+        reg1 = (code >> 16) & 0xFF;
+        val = (code >> 8) & 0xFF;
+        reg2 = code & 0xFF;
+        target = jump_points[reg2];
+        if (registers[reg1] > val) {
+            code_index = target;
+            if (VERBOSE) {printf("jumping to: %d\n", target);}
+        } else {
+            code_index++;
+            if (VERBOSE) {printf("not jumping");}
+        }
         return 0;
     default:
         return 0;
