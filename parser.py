@@ -1,4 +1,4 @@
-opcodes = ["OP_LOAD", "OP_JUMP", "OP_PNUM", "OP_PCHR", "OP_SWAP", "OP_ADD", "OP_SUB", "OP_MUL", "OP_END", "OP_IJMP", "OP_OMIT", "OP_PSWP", "OP_GJMP", "OP_NLIN"]
+opcodes = ["LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD", "SUB", "MUL", "END", "IJMP", "OMIT", "PSWP", "GJMP", "NLIN"]
 
 result = []
 
@@ -13,7 +13,7 @@ with open("test.meow", "r") as file:
             opcode = int(opcodes.index(keys[0]))
 
         instr = 0
-        if opcode in [1, 2, 3]: # OP_PNUM, OP_PCHR
+        if opcode in [1, 2, 3]: # PNUM, PCHR
             instr = (opcode << 24) | (int(keys[1]) << 16)
         elif opcode == 0:
             instr = (opcode << 24) | (int(keys[1]) << 16) | int(keys[2])
