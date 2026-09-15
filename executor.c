@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 const int VERBOSE = 0;
+const int VERBOSEJP = 0;
 
 enum opcodes {
     OP_LOAD,
@@ -17,12 +18,31 @@ enum opcodes {
     OP_OMIT,
     OP_PSWP,
     OP_GJMP,
-    OP_NLIN
+    OP_NLIN,
+    OP_JPNT
 };
 
 int registers[256];
+int jump_points[256];
 
 int code_index = 0;
+
+void locate_jump_points(uint32_t codes[], int size) {
+    for (size_t i = 0; i < size; i++) {
+        uint32_t code = codes[i];
+        int opcode = (code >> 24) & 0xFF;
+        int reg1;
+        int val;
+        if (opcode == OP_JPNT) {
+            if (VERBOSEJP) {printf("OP_JPNT\n");}
+            reg1 = (code >> 16) & 0xFF;
+            val = code & 0xFFFF;
+            jump_points[reg1] = val;
+            if (VERBOSEJP) {printf("jpnt: %d  value: %d actual value: %d\n", reg1, val, jump_points[reg1]);};
+        }
+    }
+
+}
 
 int execute_opcode(uint32_t code) {
     int opcode = (code >> 24) & 0xFF;
@@ -43,7 +63,7 @@ int execute_opcode(uint32_t code) {
     case OP_JUMP:
         if (VERBOSE) {printf("OP_JUMP\n");}
         reg1 = (code >> 16) & 0xFF;
-        val = registers[reg1];
+        val = jump_points[reg1];
         if (VERBOSE) {printf("jumping to: %d\n", val);}
         code_index = val;
         return 0;
@@ -111,7 +131,7 @@ int execute_opcode(uint32_t code) {
         reg1 = (code >> 16) & 0xFF;
         reg2 = (code >> 8) & 0xFF;
         reg3 = code & 0xFF;
-        val = registers[reg3];
+        val = jump_points[reg3];
         if (registers[reg1] == registers[reg2]) {
             code_index = val;
             if (VERBOSE) {printf("jumping to: %d\n", val);}
@@ -143,7 +163,7 @@ int execute_opcode(uint32_t code) {
         reg1 = (code >> 16) & 0xFF;
         reg2 = (code >> 8) & 0xFF;
         reg3 = code & 0xFF;
-        val = registers[reg3];
+        val = jump_points[reg3];
         if (registers[reg1] > registers[reg2]) {
             code_index = val;
             if (VERBOSE) {printf("jumping to: %d\n", val);}
@@ -155,6 +175,14 @@ int execute_opcode(uint32_t code) {
     case OP_NLIN:
         if (VERBOSE) {printf("OP_NLIN\n");}
         printf("\n");
+        code_index++;
+        return 0;
+    case OP_JPNT:
+        if (VERBOSE) {printf("OP_JPNT\n");}
+        reg1 = (code >> 16) & 0xFF;
+        val = code & 0xFFFF;
+        jump_points[reg1] = val;
+        if (VERBOSE) {printf("jpnt: %d  value: %d actual value: %d\n", reg1, val, jump_points[reg1]);};
         code_index++;
         return 0;
     default:
@@ -174,6 +202,7 @@ int main() {
     fread(code, 4, size / 4, file);
     fclose(file);
 
+    locate_jump_points(code, size / 4);
 
     int stop = 0;
     while (!stop)
