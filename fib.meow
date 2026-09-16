@@ -16,12 +16,8 @@ PNUM 0
 NLIN
 
 ADD 10 .1 10
-IJMP 10 .10 end
+UJMP 10 .10 main
 
-JUMP main
-
-// end op
-
-: end
+// end
 NLIN
 END

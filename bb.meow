@@ -14,10 +14,6 @@ LOAD 10 6
 LOAD 100 1
 LOAD 110 1
 
-// temp storage reg locations
-LOAD 200 210
-LOAD 201 211
-
 // main loop
 
 : main
@@ -29,7 +25,7 @@ PSWP 100 201
 SUB 100 .1 100
 
 // if right is greater, skip
-GJMP 211 210 mid_swap
+GJMP 211 200 mid_swap
 
 // swap them back swapped
 PSWP 100 201

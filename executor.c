@@ -25,7 +25,9 @@ enum opcodes {
     OP_IMUL,
     OP_COPY,
     OP_IIJP,
-    OP_IGJP
+    OP_IGJP,
+    OP_UJMP,
+    OP_IUJP
 };
 
 int registers[256];
@@ -47,7 +49,6 @@ void locate_jump_points(uint32_t codes[], int size) {
             if (VERBOSEJP) {printf("jpnt: %d  value: %d actual value: %d\n", reg1, val, jump_points[reg1]);};
         }
     }
-
 }
 
 int execute_opcode(uint32_t code) {
@@ -168,9 +169,8 @@ int execute_opcode(uint32_t code) {
     case OP_PSWP:
         if (VERBOSE) {printf("OP_SWAP\n");}
         int reg1_p = (code >> 16) & 0xFF;
-        int reg2_p = (code >> 8) & 0xFF;
+        int reg2 = (code >> 8) & 0xFF;
         reg1 = registers[reg1_p];
-        reg2 = registers[reg2_p];
         if (VERBOSE) {printf("swapping reg1: %d  reg2: %d\n", reg1, reg2);};
         if (VERBOSE) {printf("before values: reg1: %d  reg2: %d\n", registers[reg1], registers[reg2]);};
         val = registers[reg1];
@@ -257,6 +257,35 @@ int execute_opcode(uint32_t code) {
         } else {
             code_index++;
             if (VERBOSE) {printf("not jumping");}
+        }
+        return 0;
+    case OP_UJMP:
+        if (VERBOSE) {printf("OP_UJMP\n");}
+        reg1 = (code >> 16) & 0xFF;
+        reg2 = (code >> 8) & 0xFF;
+        reg3 = code & 0xFF;
+        target = jump_points[reg3];
+        if (registers[reg1] != registers[reg2]) {
+            code_index = target;
+            if (VERBOSE) {printf("jumping to: %d\n", target);}
+        } else {
+            code_index++;
+            if (VERBOSE) {printf("not jumping\n");}
+        }
+        return 0;
+    case OP_IUJP:
+        if (VERBOSE) {printf("OP_IUJP\n");}
+        reg1 = (code >> 16) & 0xFF;
+        val = (code >> 8) & 0xFF;
+        reg2 = code & 0xFF;
+        target = jump_points[reg2];
+        if (VERBOSE) {printf("ii reg1: %d val: %d reg2: %d target: %d\n", registers[reg1], val, reg2, target);}
+        if (registers[reg1] != val) {
+            code_index = target;
+            if (VERBOSE) {printf("jumping to: %d\n", target);}
+        } else {
+            code_index++;
+            if (VERBOSE) {printf("not jumping\n");}
         }
         return 0;
     default:

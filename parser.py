@@ -1,5 +1,7 @@
-opcodes = ["LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD", "SUB", "MUL", "END", "IJMP", "GJMP", "_omit", "PSWP", "NLIN", ":", "_iadd", "_isub", "_imul", "COPY", "_iijp", "_igjp"]
-#           0       1       2       3       4       5      6      7      8      9       10       11      12      13      14   15       16       17       18      19       20 
+opcodes = ["LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD", "SUB", "MUL", "END", "IJMP", "GJMP", "_omit", "PSWP", "NLIN", ":", "_iadd", "_isub", "_imul", "COPY", "_iijp", "_igjp", "UJMP", "_iujp"]
+#           0       1       2       3       4       5      6      7      8      9       10       11      12      13      14   15       16       17       18      19       20       21      22
+
+iops = {"ADD": "_iadd", "SUB": "_isub", "MUL": "_imul", "IJMP": "_iijp", "GJMP": "_igjp", "UJMP": "_iujp"}
 
 result = []
 
@@ -39,12 +41,10 @@ with open("test.meow", "r") as file:
         else:
             opcode = int(opcodes.index(keys[0]))    
             if has_immediate:
-                opcode += 10
+                opcode = opcodes.index(iops[keys[0]])
                 keys[0] = opcodes[opcode]
-            if opcode in [5, 15, 19]:
-                prnt = True
 
-        if opcode in [1, 9, 10, 19, 20]: # JUMP, IJMP, GJMP, _iijp, _igmp
+        if opcode in [1, 9, 10, 19, 20, 21, 22]: # JUMP, IJMP, GJMP, _iijp, _igmp, UJMP, _iujp
             for i in range(len(keys)):
                 key = keys[i]
                 if key in point_names:
@@ -66,7 +66,7 @@ with open("test.meow", "r") as file:
             instr = (opcode << 24) | (int(point_num) << 16) | linecount
         elif opcode in [4, 12, 18]: # SWAP, PSWP, COPY
             instr = (opcode << 24) | (int(keys[1]) << 16) | (int(keys[2]) << 8)
-        elif opcode in [5, 6, 7, 9, 10, 15, 16, 17, 19, 20]: # ADD, SUB, MUL, IJMP, GJMP, _iadd, _isub, _imul, _iijp, _igjp
+        elif opcode in [5, 6, 7, 9, 10, 15, 16, 17, 19, 20, 21, 22]: # ADD, SUB, MUL, IJMP, GJMP, _iadd, _isub, _imul, _iijp, _igjp, UJMP, _iujp
             instr = (opcode << 24) | (int(keys[1]) << 16) | (int(keys[2]) << 8) | int(keys[3])
         elif opcode in [8, 11, 13]: # END, _omit, _jpnt
             instr = (opcode << 24)
