@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 const int VERBOSE = 0;
 const int VERBOSEJP = 0;
@@ -218,14 +219,14 @@ int execute_opcode(uint32_t code) {
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
     FILE *file;
-    file = fopen("test.mbin", "rb");
+    file = fopen(argv[1], "rb");
     fseek(file, 0, SEEK_END);
     int size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    uint32_t code[size / 4];
+    uint32_t *code = malloc(size);
 
     fread(code, 4, size / 4, file);
     fclose(file);
@@ -237,5 +238,7 @@ int main() {
         stop = execute_opcode(code[code_index]);
     }
     
+    free(code);
+
     return 0;
 }

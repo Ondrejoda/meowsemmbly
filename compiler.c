@@ -168,10 +168,10 @@ struct opcode tokenize(char line[], char jump_point_names[][MAX_STRING_LENGTH], 
     return op;
 }
 
-int main() {
+int main(int argc, char **argv) {
     // loading file
     FILE *file;
-    file = fopen("test.meow", "r");
+    file = fopen(argv[1], "r");
 
     // establishing counts
     int line_count = 0;
