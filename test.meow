@@ -1,68 +1,44 @@
-// numbers loaded
-LOAD 1 2
-LOAD 2 5
-LOAD 3 4
-LOAD 4 3
-LOAD 5 1
-LOAD 6 9
-LOAD 7 7
-LOAD 8 10
-LOAD 9 8
-LOAD 10 6
+// powers of two
 
-// loop values
-LOAD 100 1
-LOAD 110 1
-LOAD 120 1
+// 1-10 are the numbers
 
-// main loop
+// 1 reg for loop
+
+LOAD 1 100
+LOAD 2 100
+LOAD 3 100
+
+: init
+LOAD 20 2
+
+PSWP 1 20
+ADD 1 .1 1
+UJMP 1 .120 init
+
+LOAD 1 100
+
 : main
 
-// load two values based on index to temp area
-PSWP 100 200
-ADD 100 .1 100
-PSWP 100 201
-SUB 100 .1 100
+PSWP 1 20
+MUL 20 .2 20
+PSWP 1 20
 
-// if right is greater, skip
-GJMP 201 200 mid_swap
+ADD 1 .1 1
+UJMP 1 .120 main
 
-// swap them back swapped
-PSWP 100 201
-ADD 100 .1 100
-PSWP 100 200
-SUB 100 .1 100
-JUMP post_swap
+ADD 2 .1 2
+COPY 2 1
+UJMP 2 .120 main
 
-// swap them back normally
-: mid_swap
+: finish
 
-PSWP 100 200
-ADD 100 .1 100
-PSWP 100 201
-SUB 100 .1 100
+PSWP 3 15
+PNUM 15
+NLIN
+PSWP 3 15
+ADD 3 .1 3
+UJMP 3 .120 finish
 
-: post_swap
-
-// increment first loop
-ADD 100 .1 100
-
-// jump back to start of main if loop isnt finished
-UJMP 100 .10 main
-
-// reset first loop and increment second loop
-LOAD 100 1
-ADD 110 .1 110
-UJMP 110 .10 main
-
-// end setup
-: end
-
-PSWP 120 202
-PNUM 202
-PSWP 120 202
-ADD 120 .1 120
-UJMP 120 .11 end
-
+// end
 NLIN
 END

@@ -13,9 +13,9 @@ LOAD 10 6
 // loop values
 LOAD 100 1
 LOAD 110 1
+LOAD 120 1
 
 // main loop
-
 : main
 
 // load two values based on index to temp area
@@ -25,7 +25,7 @@ PSWP 100 201
 SUB 100 .1 100
 
 // if right is greater, skip
-GJMP 211 200 mid_swap
+GJMP 201 200 mid_swap
 
 // swap them back swapped
 PSWP 100 201
@@ -35,7 +35,6 @@ SUB 100 .1 100
 JUMP post_swap
 
 // swap them back normally
-
 : mid_swap
 
 PSWP 100 200
@@ -45,34 +44,25 @@ SUB 100 .1 100
 
 : post_swap
 
-// increment loops
+// increment first loop
 ADD 100 .1 100
-IJMP 100 .10 increment_loop
 
-JUMP main
+// jump back to start of main if loop isnt finished
+UJMP 100 .10 main
 
-// progress second loop
-
-: increment_loop
-
+// reset first loop and increment second loop
 LOAD 100 1
 ADD 110 .1 110
-IJMP 110 .10 end
-JUMP main
+UJMP 110 .10 main
 
 // end setup
-
 : end
 
-PNUM 1
-PNUM 2
-PNUM 3
-PNUM 4
-PNUM 5
-PNUM 6
-PNUM 7
-PNUM 8
-PNUM 9
-PNUM 10
+PSWP 120 202
+PNUM 202
+PSWP 120 202
+ADD 120 .1 120
+UJMP 120 .11 end
+
 NLIN
 END

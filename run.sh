@@ -1,3 +1,4 @@
-python parser.py
-gcc -o compiled/executor executor.c
-./compiled/executor
+clear
+python compiler.py
+gcc -o compiled/vm vm.c
+./compiled/vm
