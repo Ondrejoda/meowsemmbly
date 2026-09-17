@@ -233,6 +233,10 @@ int execute_opcode(uint32_t code) {
         return 0;
     case OP_DIV:
         if (VERBOSE) {printf("OP_DIV\n");}
+        if (registers[arg2] == 0) {
+            printf("speed i be watching your stream bruh why you tryin not to laugh bruh");
+            return 1;
+        }
         val = registers[arg1] / registers[arg2];
         registers[arg3] = val;
         if (VERBOSE) {printf("arg1: %d  arg2: %d arg3: %d result: %d\n", arg1, arg2, arg3, val);};
@@ -240,6 +244,10 @@ int execute_opcode(uint32_t code) {
         return 0;
     case OP_IDIV:
         if (VERBOSE) {printf("OP_IDIV\n");}
+        if (arg2 == 0) {
+            printf("speed i be watching your stream bruh why you tryin not to laugh bruh");
+            return 1;
+        }
         val = registers[arg1] / arg2;
         registers[arg3] = val;
         if (VERBOSE) {printf("arg1: %d  arg2: %d arg3: %d result: %d\n", arg1, arg2, arg3, val);};

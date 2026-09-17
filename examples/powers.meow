@@ -1,0 +1,63 @@
+// data size
+LOAD 250 20
+
+// loop i
+LOAD 1 0
+
+// data setter
+LOAD 10 2
+
+: begin
+
+WRIT 10 1
+
+ADD 1 .1 1
+UJMP 1 250 begin
+
+// begin setup finished
+
+LOAD 1 0
+
+: main
+
+COPY 1 100
+
+CALL power
+
+ADD 1 .1 1
+UJMP 1 250 main
+
+// end setup
+LOAD 1 0
+
+: end
+
+READ 1 200
+PNUM 200
+SPAC
+ADD 1 .1 1
+UJMP 1 250 end
+
+NLIN
+END
+
+// reg 100 is the target
+
+: power
+
+LOAD 9 0
+READ 100 200
+
+: power_loop
+
+IJMP 9 100 power_loop_exit
+
+MUL 200 .2 200
+
+ADD 9 .1 9
+JUMP power_loop
+
+: power_loop_exit
+
+WRIT 200 100
+RTN
