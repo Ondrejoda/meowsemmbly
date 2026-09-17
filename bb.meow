@@ -19,27 +19,18 @@ LOAD 120 1
 : main
 
 // load two values based on index to temp area
-PSWP 100 200
+PCPY 100 200
 ADD 100 .1 100
-PSWP 100 201
+PCPY 100 201
 SUB 100 .1 100
 
 // if right is greater, skip
-GJMP 201 200 mid_swap
+GJMP 201 200 post_swap
 
 // swap them back swapped
 PSWP 100 201
 ADD 100 .1 100
 PSWP 100 200
-SUB 100 .1 100
-JUMP post_swap
-
-// swap them back normally
-: mid_swap
-
-PSWP 100 200
-ADD 100 .1 100
-PSWP 100 201
 SUB 100 .1 100
 
 : post_swap
@@ -58,9 +49,8 @@ UJMP 110 .10 main
 // end setup
 : end
 
-PSWP 120 202
+PCPY 120 202
 PNUM 202
-PSWP 120 202
 ADD 120 .1 120
 UJMP 120 .11 end
 
