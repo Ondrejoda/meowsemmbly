@@ -126,7 +126,7 @@ struct opcode tokenize(char line[], char jump_point_names[][MAX_STRING_LENGTH], 
         }
     }
 
-    for (int i = 0; i < 23; i++) {
+    for (int i = 0; i < 22; i++) {
         if (strcmp(tokens[0], opcode_names[i]) == 0) {
             if (has_immediate == 1) {
                 op.opcode = iops[i];
@@ -180,7 +180,7 @@ int main() {
 
     // counting
     while(fgets(myString, MAX_STRING_LENGTH, file)) {
-        if (strstr(myString, ":") != NULL) {
+        if (myString[0] == ':') {
             jump_point_count++;
         }
         line_count++;
