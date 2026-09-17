@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define VERBOSE 0
 #define VERBOSEJP 0
+
+#define REGISTRY_SIZE 256
+#define MEMORY_SIZE 65535
+#define CALL_STACK_SIZE 1024
 
 enum opcodes {
     OP_LOAD,
@@ -32,10 +37,20 @@ enum opcodes {
     OP_IDIV,
     OP_MOD,
     OP_IMOD,
-    OP_PCPY
+    OP_PCPY,
+    OP_READ,
+    OP_WRIT,
+    OP_RAND,
+    OP_SPAC,
+    OP_CALL,
+    OP_RTN
 };
 
-int registers[256];
+int registers[REGISTRY_SIZE];
+int memory[MEMORY_SIZE];
+
+int call_stack[CALL_STACK_SIZE];    
+int csp = 0;
 
 int code_index = 0;
 
@@ -250,12 +265,53 @@ int execute_opcode(uint32_t code) {
         if (VERBOSE) {printf("COPIED arg1: %d  arg2: %d\n", arg1, arg2);};
         code_index++;
         return 0;
+    case OP_READ:
+        if (VERBOSE) {printf("OP_READ\n");}
+        val = memory[registers[arg1]];
+        registers[arg2] = val;
+        code_index++;
+        if (VERBOSE) {printf("READ addr: %d  val: %d\n", arg1, val);};
+        return 0;
+    case OP_WRIT:
+        if (VERBOSE) {printf("OP_WRIT\n");}
+        val = registers[arg1];
+        memory[registers[arg2]] = val;
+        code_index++;
+        if (VERBOSE) {printf("WRITE addr: %d  val: %d\n", arg1, val);};
+        return 0;
+    case OP_RAND:
+        if (VERBOSE) {printf("OP_RAND\n");}
+        val = rand();
+        val = val % (registers[arg2] - registers[arg1]);
+        val += registers[arg1];
+        registers[arg3] = val;
+        if (VERBOSE) {printf("arg1: %d  arg2: %d arg3: %d result: %d\n", arg1, arg2, arg3, val);};
+        code_index++;
+        return 0;
+    case OP_SPAC:
+        if (VERBOSE) {printf("OP_SPAC\n");}
+        printf(" ");
+        code_index++;
+        return 0;
+    case OP_CALL:
+        if (VERBOSE) {printf("OP_CALL\n");}
+        call_stack[csp++] = code_index + 1;
+        code_index = arg1;
+        if (VERBOSE) {printf("calling: %d\n", arg1);};
+        return 0;
+    case OP_RTN:
+        if (VERBOSE) {printf("OP_RTN\n");}
+        code_index = call_stack[--csp];
+        if (VERBOSE) {printf("returning\n");};
+        return 0;
     default:
         return 0;
     }
 }
 
 int main(int argc, char **argv) {
+    srand(time(NULL));
+
     FILE *file;
     file = fopen(argv[1], "rb");
     fseek(file, 0, SEEK_END);

@@ -1,37 +1,34 @@
 // loop i and rand range
 
-LOAD 100 0
+LOAD 100 1
 LOAD 250 1
 LOAD 251 100
 
 // element amount
-LOAD 252 50
+LOAD 252 10
 
 : begin
 
 RAND 250 251 200
 PNUM 200
-SPAC
 WRIT 200 100
 
 ADD 100 .1 100
 UJMP 100 252 begin
 
 
-NLIN
-NLIN
-
 // loop values
-LOAD 100 0
-LOAD 110 0
-
-SUB 252 .1 253
+LOAD 100 1
+LOAD 110 1
+LOAD 120 1
 
 // main loop
 : main
 
 // load two values based on index to temp area
 READ 100 200
+PNUM 200
+NLIN
 ADD 100 .1 100
 READ 100 201
 SUB 100 .1 100
@@ -51,23 +48,20 @@ SUB 100 .1 100
 ADD 100 .1 100
 
 // jump back to start of main if loop isnt finished
-UJMP 100 253 main
+UJMP 100 252 main
 
 // reset first loop and increment second loop
-LOAD 100 0
+LOAD 100 1
 ADD 110 .1 110
-UJMP 110 253 main
+UJMP 110 252 main
 
 // end setup
-
-LOAD 120 0
 : end
 
-READ 120 200
-PNUM 200
-SPAC
+PCPY 120 202
+PNUM 202
 ADD 120 .1 120
-UJMP 120 252 end
+UJMP 120 .11 end
 
 NLIN
 END
