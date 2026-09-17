@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-const int VERBOSE = 0;
-const int VERBOSEJP = 0;
+#define VERBOSE 0
+#define VERBOSEJP 0
 
 enum opcodes {
     OP_LOAD,
@@ -27,7 +27,12 @@ enum opcodes {
     OP_IIJP,
     OP_IGJP,
     OP_UJMP,
-    OP_IUJP
+    OP_IUJP,
+    OP_DIV,
+    OP_IDIV,
+    OP_MOD,
+    OP_IMOD,
+    OP_PCPY
 };
 
 int registers[256];
@@ -36,9 +41,6 @@ int code_index = 0;
 
 int execute_opcode(uint32_t code) {
     int opcode = ((code >> 24) & 0xFF);
-    if (opcode == 22) {
-        return 1;
-    }
     if (opcode == OP_LOAD) {
         if (VERBOSE) {printf("OP_LOAD\n");}
         int r1 = (code >> 16) & 0xFF;
@@ -214,6 +216,40 @@ int execute_opcode(uint32_t code) {
             if (VERBOSE) {printf("not jumping\n");}
         }
         return 0;
+    case OP_DIV:
+        if (VERBOSE) {printf("OP_DIV\n");}
+        val = registers[arg1] / registers[arg2];
+        registers[arg3] = val;
+        if (VERBOSE) {printf("arg1: %d  arg2: %d arg3: %d result: %d\n", arg1, arg2, arg3, val);};
+        code_index++;
+        return 0;
+    case OP_IDIV:
+        if (VERBOSE) {printf("OP_IDIV\n");}
+        val = registers[arg1] / arg2;
+        registers[arg3] = val;
+        if (VERBOSE) {printf("arg1: %d  arg2: %d arg3: %d result: %d\n", arg1, arg2, arg3, val);};
+        code_index++;
+        return 0;
+    case OP_MOD:
+        if (VERBOSE) {printf("OP_MOD\n");}
+        val = registers[arg1] % registers[arg2];
+        registers[arg3] = val;
+        if (VERBOSE) {printf("arg1: %d  arg2: %d arg3: %d result: %d\n", arg1, arg2, arg3, val);};
+        code_index++;
+        return 0;
+    case OP_IMOD:
+        if (VERBOSE) {printf("OP_IMOD\n");}
+        val = registers[arg1] % arg2;
+        registers[arg3] = val;
+        if (VERBOSE) {printf("arg1: %d  arg2: %d arg3: %d result: %d\n", arg1, arg2, arg3, val);};
+        code_index++;
+        return 0;
+    case OP_PCPY:
+        if (VERBOSE) {printf("OP_PCPY\n");}
+        registers[arg2] = registers[registers[arg1]];
+        if (VERBOSE) {printf("COPIED arg1: %d  arg2: %d\n", arg1, arg2);};
+        code_index++;
+        return 0;
     default:
         return 0;
     }
@@ -236,6 +272,10 @@ int main(int argc, char **argv) {
     while (!stop)
     {
         stop = execute_opcode(code[code_index]);
+        if (code_index >= size / 4) {
+            stop = 1;
+            printf("code overflow - dont forget END!\n");
+        }
     }
     
     free(code);

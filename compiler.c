@@ -3,10 +3,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-const int VERBOSE = 0;
-const int SUPER_VERBOSE = 0;
+#define VERBOSE 0
+#define SUPER_VERBOSE 0
 
-const int MAX_STRING_LENGTH = 100;
+#define MAX_STRING_LENGTH 100
+
+#define OPCODE_COUNT 27
+#define OPCODE_LENGTH 5
+#define OPCODE_ARG_COUNT 4
 
 enum opcodes {
     OP_LOAD,
@@ -30,7 +34,12 @@ enum opcodes {
     OP_IIJP,
     OP_IGJP,
     OP_UJMP,
-    OP_IUJP
+    OP_IUJP,
+    OP_DIV,
+    OP_IDIV,
+    OP_MOD,
+    OP_IMOD,
+    OP_PCPY
 };
 
 struct opcode {
@@ -40,10 +49,10 @@ struct opcode {
     int arg3;
 };
 
-char opcode_names[22][5] = {"LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD", "SUB", "MUL", "END", "IJMP", "GJMP", "omit", "PSWP", "NLIN", "iadd", "isub", "imul", "COPY", "iijp", "igjp", "UJMP", "iujp"};
-//                           0       1       2       3       4       5      6      7      8      9       10      11      12      13      14      15      16      17      18      19      20      21
+char opcode_names[OPCODE_COUNT][OPCODE_LENGTH] = {"LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD", "SUB", "MUL", "END", "IJMP", "GJMP", "omit", "PSWP", "NLIN", "iadd", "isub", "imul", "COPY", "iijp", "igjp", "UJMP", "iujp", "DIV", "idiv", "MOD", "imod", "PCPY"};
+//                                                 0       1       2       3       4       5      6      7      8      9       10      11      12      13      14      15      16      17      18      19      20      21      22     23      24     25      26
 
-int iops[22] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0};
+int iops[OPCODE_COUNT] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 23, 0, 25, 0, 0};
 
 char *grab_jump_point(char line[]) {
     char *rtn = malloc(MAX_STRING_LENGTH);
@@ -85,7 +94,7 @@ struct opcode tokenize(char line[], char jump_point_names[][MAX_STRING_LENGTH], 
     }
 
     // tokens stuff
-    char tokens[4][MAX_STRING_LENGTH];
+    char tokens[OPCODE_ARG_COUNT][MAX_STRING_LENGTH];
     int current_token_index = 0;
     int current_token_char_index = 0;
     int has_immediate = 0;
@@ -120,13 +129,13 @@ struct opcode tokenize(char line[], char jump_point_names[][MAX_STRING_LENGTH], 
     }
 
     // fill in empty tokens to avoid junk
-    if (current_token_index != 3) {
-        for (int i = current_token_index + 1; i < 4; i++) {
+    if (current_token_index != OPCODE_ARG_COUNT - 1) {
+        for (int i = current_token_index + 1; i < OPCODE_ARG_COUNT; i++) {
             strcpy(tokens[i], "");
         }
     }
 
-    for (int i = 0; i < 22; i++) {
+    for (int i = 0; i < OPCODE_COUNT; i++) {
         if (strcmp(tokens[0], opcode_names[i]) == 0) {
             if (has_immediate == 1) {
                 op.opcode = iops[i];
