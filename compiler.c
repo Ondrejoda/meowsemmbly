@@ -8,7 +8,7 @@
 
 #define MAX_STRING_LENGTH 100
 
-#define OPCODE_COUNT 33
+#define OPCODE_COUNT 34
 #define OPCODE_LENGTH 5
 #define OPCODE_ARG_COUNT 4
 
@@ -45,7 +45,8 @@ enum opcodes {
     OP_RAND,
     OP_SPAC,
     OP_CALL,
-    OP_RTN
+    OP_RTN,
+    OP_ERR
 };
 
 struct opcode {
@@ -54,47 +55,56 @@ struct opcode {
     int arg2;
     int arg3;
 };
+
+struct alias_pair {
+    char name[MAX_STRING_LENGTH];
+    int value;
+};
+
 //                                                 0       1       2       3       4       5       6       7       8       9
 char opcode_names[OPCODE_COUNT][OPCODE_LENGTH] = {"LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD" , "SUB" , "MUL" , "END" , "IJMP", 
                                                   "GJMP", "omit", "PSWP", "NLIN", "iadd", "isub", "imul", "COPY", "iijp", "igjp", 
                                                   "UJMP", "iujp", "DIV" , "idiv", "MOD" , "imod", "PCPY", "READ", "WRIT", "RAND", 
-                                                  "SPAC", "CALL", "RTN"};
+                                                  "SPAC", "CALL", "RTN", "ERR"};
 
-int iops[OPCODE_COUNT] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 23, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0};
+int iops[OPCODE_COUNT] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 23, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 char *grab_jump_point(char line[]) {
-    char *rtn = malloc(MAX_STRING_LENGTH);
+    char *jump_point = malloc(MAX_STRING_LENGTH);
     if (line[0] != ':') {
-        strcpy(rtn, "");
-        return rtn;
+        strcpy(jump_point, "");
+        return jump_point;
     }
 
-    char jump_point[MAX_STRING_LENGTH];
-    
-    int current_line_index = 2;
-    int jump_point_index = 0;
-    char current_char = line[current_line_index];
-    while (current_char != '\n' && current_char != 0) {
-        jump_point[jump_point_index] = line[current_line_index];
-        jump_point_index++;
-        current_line_index++;
-        current_char = line[current_line_index];
-    }
+    int result = sscanf(line, ": %s", jump_point);
 
-    jump_point[jump_point_index] = 0;
-
-    strcpy(rtn, jump_point);
-
-    return rtn;
+    return jump_point;
 }
 
-struct opcode tokenize(char line[], char jump_point_names[][MAX_STRING_LENGTH], int jump_point_indexes[], int jump_point_count) {
+struct alias_pair grab_alias(char line[]) {
+    struct alias_pair alias;
+    if (line[0] != '@') {
+        strcpy(alias.name, "");
+        alias.value = 0;
+        return alias;
+    }
+
+    char name[MAX_STRING_LENGTH];
+    int value = 0;
+
+    int result = sscanf(line, "@ %s %d", name, &value);
+
+    return alias;
+}
+
+struct opcode tokenize(char line[], char jump_point_names[][MAX_STRING_LENGTH], int jump_point_indexes[], int jump_point_count, char alias_names[][MAX_STRING_LENGTH], int alias_values[], int alias_count) {
     struct opcode op;
 
-    // snipe those omits
-    op.opcode = OP_OMIT;
+    op.opcode = -1;
 
-    if (line[0] == '/' || line[0] == '\n' || line[0] == ':') {
+    // snipe those omits
+    if (line[0] == '/' || line[0] == '\n' || line[0] == ':' || line[0] == '@') {
+        op.opcode = OP_OMIT;
         op.arg1 = 0;
         op.arg2 = 0;
         op.arg3 = 0;
@@ -154,31 +164,59 @@ struct opcode tokenize(char line[], char jump_point_names[][MAX_STRING_LENGTH], 
         }
     }
 
-    int replaced_jp1 = 0;
-    int replaced_jp2 = 0;
-    int replaced_jp3 = 0;
-    for (int i = 0; i < jump_point_count; i++) {
-        if (strcmp(tokens[1], jump_point_names[i]) == 0) {
-            op.arg1 = jump_point_indexes[i];
-            replaced_jp1 = 1;
-        }
-        if (strcmp(tokens[2], jump_point_names[i]) == 0) {
-            op.arg2 = jump_point_indexes[i];
-            replaced_jp2 = 1;
-        }
-        if (strcmp(tokens[3], jump_point_names[i]) == 0) {
-            op.arg3 = jump_point_indexes[i];
-            replaced_jp3 = 1;
+    if (op.opcode == -1) {
+        for (int i = 0; i < jump_point_count; i++) {
+            if (strcmp(tokens[0], jump_point_names[i]) == 0) {
+                op.opcode = 31;
+                strcpy(tokens[1], jump_point_names[i]);
+            }
         }
     }
 
-    if (!replaced_jp1) {
+    if (op.opcode == -1) {
+        op.opcode = 33;
+    }
+
+    int replaced_1 = 0;
+    int replaced_2 = 0;
+    int replaced_3 = 0;
+    for (int i = 0; i < jump_point_count; i++) {
+        if (strcmp(tokens[1], jump_point_names[i]) == 0) {
+            op.arg1 = jump_point_indexes[i];
+            replaced_1 = 1;
+        }
+        if (strcmp(tokens[2], jump_point_names[i]) == 0) {
+            op.arg2 = jump_point_indexes[i];
+            replaced_2 = 1;
+        }
+        if (strcmp(tokens[3], jump_point_names[i]) == 0) {
+            op.arg3 = jump_point_indexes[i];
+            replaced_3 = 1;
+        }
+    }
+
+    for (int i = 0; i < alias_count; i++) {
+        if (strcmp(tokens[1], alias_names[i]) == 0) {
+            op.arg1 = alias_values[i];
+            replaced_1 = 1;
+        }
+        if (strcmp(tokens[2], alias_names[i]) == 0) {
+            op.arg2 = alias_values[i];
+            replaced_2 = 1;
+        }
+        if (strcmp(tokens[3], alias_names[i]) == 0) {
+            op.arg3 = alias_values[i];
+            replaced_3 = 1;
+        }
+    }
+
+    if (!replaced_1) {
         op.arg1 = atoi(tokens[1]);
     }
-    if (!replaced_jp2) {
+    if (!replaced_2) {
         op.arg2 = atoi(tokens[2]);
     }
-    if (!replaced_jp3) {
+    if (!replaced_3) {
         op.arg3 = atoi(tokens[3]);
     }
 
@@ -193,12 +231,16 @@ int main(int argc, char **argv) {
     // establishing counts
     int line_count = 0;
     int jump_point_count = 0;
+    int alias_count = 0;
     char myString[MAX_STRING_LENGTH];
 
     // counting
     while(fgets(myString, MAX_STRING_LENGTH, file)) {
         if (myString[0] == ':') {
             jump_point_count++;
+        }
+        if (myString[0] == '@') {
+            alias_count++;
         }
         line_count++;
     }
@@ -209,6 +251,10 @@ int main(int argc, char **argv) {
     char code[line_count][MAX_STRING_LENGTH];
     char jump_point_names[jump_point_count][MAX_STRING_LENGTH];
     int jump_point_indexes[jump_point_count];
+
+    char alias_names[alias_count][MAX_STRING_LENGTH];
+    int alias_values[alias_count];
+
     int current_line = 0;
 
     // loading stuff into arrays
@@ -233,12 +279,24 @@ int main(int argc, char **argv) {
         free(jp);
     }
 
+    //grabbing all aliases
+    int alias_index = 0;
+    for (int i = 0; i < line_count; i++) {
+        strcpy(line, code[i]);
+        struct alias_pair alias = grab_alias(line);
+        if (strlen(alias.name) > 0) {
+            strcpy(alias_names[alias_index], alias.name);
+            alias_values[alias_index] = alias.value;
+            alias_index++;
+        }
+    }
+
     
     file = fopen("test.mbin", "wb");
 
     for (int i = 0; i < line_count; i++) {
         strcpy(line, code[i]);
-        struct opcode op = tokenize(line, jump_point_names, jump_point_indexes, jump_point_count);
+        struct opcode op = tokenize(line, jump_point_names, jump_point_indexes, jump_point_count, alias_names, alias_values, alias_count);
         if (VERBOSE) {printf("===\nline %d: %sopcode: %d arg1: %d arg2: %d arg3: %d\n===\n", i, code[i], op.opcode, op.arg1, op.arg2, op.arg3);};
 
         uint32_t to_write = 0;

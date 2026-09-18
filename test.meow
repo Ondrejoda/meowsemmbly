@@ -1,5 +1,12 @@
-LOAD 1 10
-DIV 1 .2 2
-PNUM 2
-NLIN
+@ target 10
+
+print_one
 END
+
+
+: print_one
+
+LOAD target 1
+PNUM target
+NLIN
+RTN

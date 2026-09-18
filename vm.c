@@ -6,7 +6,7 @@
 #define VERBOSE 0
 #define VERBOSEJP 0
 
-#define REGISTRY_SIZE 260
+#define REGISTRY_SIZE 256
 #define MEMORY_SIZE 65535
 #define CALL_STACK_SIZE 1024
 
@@ -43,7 +43,8 @@ enum opcodes {
     OP_RAND,
     OP_SPAC,
     OP_CALL,
-    OP_RTN
+    OP_RTN,
+    OP_ERR
 };
 
 int registers[REGISTRY_SIZE];
@@ -312,6 +313,10 @@ int execute_opcode(uint32_t code) {
         code_index = call_stack[--csp];
         if (VERBOSE) {printf("returning\n");};
         return 0;
+    case OP_ERR:
+        if (VERBOSE) {printf("OP_ERR\n");}
+        printf("oops! something went wrong (you probably tried to use an opcode that doesnt exist or call a function you didnt declare...)\n");
+        return 1;
     default:
         return 0;
     }
