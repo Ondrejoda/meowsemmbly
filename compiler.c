@@ -8,7 +8,7 @@
 
 #define MAX_STRING_LENGTH 100
 
-#define OPCODE_COUNT 34
+#define OPCODE_COUNT 40
 #define OPCODE_LENGTH 5
 #define OPCODE_ARG_COUNT 4
 
@@ -46,7 +46,13 @@ enum opcodes {
     OP_SPAC,
     OP_CALL,
     OP_RTN,
-    OP_ERR
+    OP_ERR,
+    OP_ISDL,
+    OP_SCOL,
+    OP_DRAW,
+    OP_FLSH,
+    OP_USKP,
+    OP_IUSK
 };
 
 struct opcode {
@@ -65,9 +71,9 @@ struct alias_pair {
 char opcode_names[OPCODE_COUNT][OPCODE_LENGTH] = {"LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD" , "SUB" , "MUL" , "END" , "IJMP", 
                                                   "GJMP", "omit", "PSWP", "NLIN", "iadd", "isub", "imul", "COPY", "iijp", "igjp", 
                                                   "UJMP", "iujp", "DIV" , "idiv", "MOD" , "imod", "PCPY", "READ", "WRIT", "RAND", 
-                                                  "SPAC", "CALL", "RTN" , "ERR"};
+                                                  "SPAC", "CALL", "RTN" , "ERR" , "ISDL", "SCOL", "DRAW", "FLSH", "USKP", "iusk"};
 
-int iops[OPCODE_COUNT] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 23, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int iops[OPCODE_COUNT] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 23, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 39, 0};
 
 char *grab_jump_point(char line[]) {
     char *jump_point = malloc(MAX_STRING_LENGTH);

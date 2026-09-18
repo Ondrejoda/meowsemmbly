@@ -1,5 +1,5 @@
 clear
-gcc -o compiled/compiler compiler.c
+gcc compiler.c -o compiled/compiler 
 ./compiled/compiler test.meow
-gcc -o compiled/vm vm.c
+gcc vm.c -lSDL2 -o compiled/vm 
 ./compiled/vm test.mbin

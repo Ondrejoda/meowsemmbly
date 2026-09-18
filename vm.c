@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
+#include <SDL2/SDL.h>
 
 #define VERBOSE 0
 #define VERBOSEJP 0
@@ -44,7 +45,13 @@ enum opcodes {
     OP_SPAC,
     OP_CALL,
     OP_RTN,
-    OP_ERR
+    OP_ERR,
+    OP_ISDL,
+    OP_SCOL,
+    OP_DRAW,
+    OP_FLSH,
+    OP_USKP,
+    OP_IUSK
 };
 
 int registers[REGISTRY_SIZE];
@@ -52,6 +59,9 @@ int memory[MEMORY_SIZE];
 
 int call_stack[CALL_STACK_SIZE];    
 int csp = 0;
+
+SDL_Window *window = NULL;
+SDL_Renderer *renderer = NULL;
 
 int code_index = 0;
 
@@ -291,7 +301,7 @@ int execute_opcode(uint32_t code) {
     case OP_RAND:
         if (VERBOSE) {printf("OP_RAND\n");}
         val = rand();
-        val = val % (registers[arg2] - registers[arg1]);
+        val = val % (registers[arg2] - registers[arg1] + 1);
         val += registers[arg1];
         registers[arg3] = val;
         if (VERBOSE) {printf("arg1: %d  arg2: %d arg3: %d result: %d\n", arg1, arg2, arg3, val);};
@@ -315,8 +325,58 @@ int execute_opcode(uint32_t code) {
         return 0;
     case OP_ERR:
         if (VERBOSE) {printf("OP_ERR\n");}
-        printf("oops! something went wrong (you probably tried to use an opcode that doesnt exist or call a function you didnt declare...)\n");
+        printf("oops! something went wrong (you probably tried to use an opcode that doesnt exist, call a function you didnt declare or use an alias you didnt declare either...)\n");
         return 1;
+    case OP_ISDL:
+        if (VERBOSE) {printf("OP_ISDL\n");}
+        SDL_Init(SDL_INIT_VIDEO);
+        window = SDL_CreateWindow("meowsemmbly", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+                                registers[arg1], registers[arg2], 0);
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+        code_index++;
+        return 0;
+    case OP_SCOL:
+        if (VERBOSE) {printf("OP_SCOL\n");}
+        SDL_SetRenderDrawColor(renderer, registers[arg1], registers[arg2], registers[arg3], 255);
+        code_index++;
+        return 0;
+    case OP_DRAW:
+        if (VERBOSE) {printf("OP_DRAW\n");}
+        SDL_RenderDrawPoint(renderer, registers[arg1], registers[arg2]);
+        code_index++;
+        return 0;
+    case OP_FLSH:
+        if (VERBOSE) {printf("OP_FLSH\n");}
+        SDL_RenderPresent(renderer);
+
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                return 1;
+            }
+        }
+        code_index++;
+        return 0;
+    case OP_USKP:
+        if (VERBOSE) {printf("OP_USKP\n");}
+        if (registers[arg1] != registers[arg2]) {
+            code_index++;
+        } else {
+            code_index++;
+            code_index++;
+        }
+        return 0;
+    case OP_IUSK:
+        if (VERBOSE) {printf("OP_IUSK\n");}
+        if (registers[arg1] != arg2) {
+            code_index++;
+        } else {
+            code_index++;
+            code_index++;
+        }
+        return 0;
     default:
         return 0;
     }
@@ -344,6 +404,18 @@ int main(int argc, char **argv) {
         if (code_index >= size / 4) {
             stop = 1;
             printf("code overflow - dont forget END!\n");
+        }
+    }
+
+    if (renderer != NULL) {
+        int running = 1;
+        while (running == 1) {
+            SDL_Event event;
+            while (SDL_PollEvent(&event)) {
+                if (event.type == SDL_QUIT) {
+                    running = 0;
+                }
+            }  
         }
     }
     

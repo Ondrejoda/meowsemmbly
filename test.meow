@@ -1,24 +1,46 @@
-@ n 10
-@ val 11
+@ width 240
+@ height 241
 
-@ loop 20
-@ temp 200
+@ r 200
+@ g 201
+@ b 202
 
-LOAD n 10
-LOAD val 1
+@ temp 210
+@ temp1 211
+@ temp2 212
+@ temp3 213
+@ temp4 214
+@ temp5 215
+@ temp6 216
+@ temp7 217
+@ temp8 218
+@ temp9 219
 
-LOAD loop 0
+@ zero 0
 
+@ loop_x 220
+@ loop_y 221
 
+@ loopmax_x 222
+@ loopmax_y 223
+
+LOAD width 700
+LOAD height 700 
+
+LOAD r 255
+LOAD g 255
+LOAD b 255
+
+ISDL width height
 
 : main
 
+
+SCOL r g b
+DRAW point_x point_y
+
 ADD loop .1 loop
+UJMP loop loopmax main
 
-MUL val loop val
-
-UJMP loop n main
-
-PNUM val
-NLIN
+FLSH
 END
