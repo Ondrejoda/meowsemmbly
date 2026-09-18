@@ -6,7 +6,7 @@
 #define VERBOSE 0
 #define VERBOSEJP 0
 
-#define REGISTRY_SIZE 256
+#define REGISTRY_SIZE 260
 #define MEMORY_SIZE 65535
 #define CALL_STACK_SIZE 1024
 
