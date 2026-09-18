@@ -1,22 +1,26 @@
-// data defining
+@ pos1 0
+@ pos2 1
+@ temp 2
 
-LOAD 0 0
-LOAD 1 1
-LOAD 10 0
+@ loop 10
+
+LOAD pos1 0
+LOAD pos2 1
+LOAD loop 0
 
 // main loop
 
 : main
 
-ADD 0 1 2
-SWAP 0 1
-SWAP 1 2
+ADD pos1 pos2 temp
+SWAP pos1 pos2
+SWAP pos2 temp
 
-PNUM 0
+PNUM pos1
 NLIN
 
-ADD 10 .1 10
-UJMP 10 .10 main
+ADD loop .1 loop
+UJMP loop .10 main
 
 // end
 NLIN

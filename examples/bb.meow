@@ -1,73 +1,81 @@
-// loop i and rand range
+// setting aliases
+@ r_min 250
+@ r_max 251
+@ element_amount 252
+@ loop_boundary 253
 
-LOAD 100 0
-LOAD 250 1
-LOAD 251 100
+@ loop 100
+@ outer_loop 110
 
-// element amount
-LOAD 252 50
+@ temp1 200
+@ temp2 201
+
+LOAD loop 0
+LOAD r_min 1
+LOAD r_max 100
+
+LOAD element_amount 50
 
 : begin
 
-RAND 250 251 200
-PNUM 200
+RAND r_min r_max temp1
+PNUM temp1
 SPAC
-WRIT 200 100
+WRIT temp1 loop
 
-ADD 100 .1 100
-UJMP 100 252 begin
-
+ADD loop .1 loop
+UJMP loop element_amount begin
 
 NLIN
 NLIN
 
 // loop values
-LOAD 100 0
-LOAD 110 0
+LOAD loop 0
+LOAD outer_loop 0
 
-SUB 252 .1 253
+SUB element_amount .1 loop_boundary
 
 // main loop
 : main
 
 // load two values based on index to temp area
-READ 100 200
-ADD 100 .1 100
-READ 100 201
-SUB 100 .1 100
+READ loop temp1
+ADD loop .1 loop
+READ loop temp2
+SUB loop .1 loop
 
 // if right is greater, skip
-GJMP 201 200 post_swap
+GJMP temp2 temp1 post_swap
 
 // swap them back swapped
-WRIT 201 100
-ADD 100 .1 100
-WRIT 200 100
-SUB 100 .1 100
+WRIT temp2 loop
+ADD loop .1 loop
+WRIT temp1 loop
+SUB loop .1 loop
 
 : post_swap
 
 // increment first loop
-ADD 100 .1 100
+ADD loop .1 loop
 
 // jump back to start of main if loop isnt finished
-UJMP 100 253 main
+UJMP loop loop_boundary main
 
 // reset first loop and increment second loop
-LOAD 100 0
-ADD 110 .1 110
-UJMP 110 253 main
+LOAD loop 0
+ADD outer_loop .1 outer_loop
+UJMP outer_loop loop_boundary main
 
 // end setup
 
-LOAD 120 0
+LOAD loop 0
 : end
 
-READ 120 200
-PNUM 200
+READ loop temp1
+PNUM temp1
 SPAC
-ADD 120 .1 120
-UJMP 120 252 end
+ADD loop .1 loop
+UJMP loop element_amount end
 
 NLIN
 END

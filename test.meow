@@ -1,12 +1,24 @@
-@ target 10
+@ n 10
+@ val 11
 
-print_one
-END
+@ loop 20
+@ temp 200
+
+LOAD n 10
+LOAD val 1
+
+LOAD loop 0
 
 
-: print_one
 
-LOAD target 1
-PNUM target
+: main
+
+ADD loop .1 loop
+
+MUL val loop val
+
+UJMP loop n main
+
+PNUM val
 NLIN
-RTN
+END

@@ -65,7 +65,7 @@ struct alias_pair {
 char opcode_names[OPCODE_COUNT][OPCODE_LENGTH] = {"LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD" , "SUB" , "MUL" , "END" , "IJMP", 
                                                   "GJMP", "omit", "PSWP", "NLIN", "iadd", "isub", "imul", "COPY", "iijp", "igjp", 
                                                   "UJMP", "iujp", "DIV" , "idiv", "MOD" , "imod", "PCPY", "READ", "WRIT", "RAND", 
-                                                  "SPAC", "CALL", "RTN", "ERR"};
+                                                  "SPAC", "CALL", "RTN" , "ERR"};
 
 int iops[OPCODE_COUNT] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 23, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -93,6 +93,8 @@ struct alias_pair grab_alias(char line[]) {
     int value = 0;
 
     int result = sscanf(line, "@ %s %d", name, &value);
+    alias.value = value;
+    strcpy(alias.name, name);
 
     return alias;
 }
