@@ -12,7 +12,9 @@
 @ b 202
 
 @ loop 50
-@ loopmax 51
+@ loop2 51
+@ loopmax 52
+@ loop2max 53
 
 @ temp 210
 @ temp1 211
@@ -57,8 +59,8 @@
 
 @ zero 0
 
-LOAD width 700
-LOAD height 700 
+LOAD width 900
+LOAD height 900 
 
 LOAD randmin_pos 0
 COPY height randmax_pos
@@ -75,7 +77,8 @@ COPY height corner1_y
 COPY width corner2_x
 COPY height corner2_y
 
-LOAD loopmax 65534
+LOAD loopmax 65535
+LOAD loop2max 5
 
 LOAD r 255
 LOAD g 255
@@ -83,12 +86,12 @@ LOAD b 255
 
 ISDL width height
 
-determine_point
+CALL determine_point
 
 : main
 
 // gives random corner of triangle on corner_x, corner_y
-determine_corner
+CALL determine_corner
 
 ADD point_x corner_x point_x
 DIV point_x .2 point_x
@@ -101,6 +104,10 @@ DRAW point_x point_y
 
 ADD loop .1 loop
 UJMP loop loopmax main
+
+LOAD loop 0
+ADD loop2 .1 loop2
+UJMP loop2 loop2max main
 
 FLSH
 END

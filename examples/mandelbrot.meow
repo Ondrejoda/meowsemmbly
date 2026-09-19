@@ -28,37 +28,19 @@ LOAD width 700
 LOAD height 700 
 
 LOAD r 255
-LOAD g 0
+LOAD g 255
 LOAD b 255
 
 ISDL width height
 
 : main
 
-LOAD temp 255
-
-DIV loop_x .3 r
-DIV loop_y .3 g
-
-LOAD temp1 0
-
-ADD temp1 r temp1
-ADD temp1 g temp1
-
-DIV temp1 .2 temp1
-
-SUB temp temp1 b
-
 
 SCOL r g b
-DRAW loop_x loop_y
+DRAW point_x point_y
 
-ADD loop_x .1 loop_x
-UJMP loop_x width main
-
-LOAD loop_x 0
-ADD loop_y .1 loop_y
-UJMP loop_y height main
+ADD loop .1 loop
+UJMP loop loopmax main
 
 FLSH
 END

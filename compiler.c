@@ -8,7 +8,7 @@
 
 #define MAX_STRING_LENGTH 100
 
-#define OPCODE_COUNT 40
+#define OPCODE_COUNT 44
 #define OPCODE_LENGTH 5
 #define OPCODE_ARG_COUNT 4
 
@@ -51,8 +51,12 @@ enum opcodes {
     OP_SCOL,
     OP_DRAW,
     OP_FLSH,
+    OP_ISKP,
+    OP_IISK,
     OP_USKP,
-    OP_IUSK
+    OP_IUSK,
+    OP_GSKP,
+    OP_IGSK
 };
 
 struct opcode {
@@ -71,9 +75,10 @@ struct alias_pair {
 char opcode_names[OPCODE_COUNT][OPCODE_LENGTH] = {"LOAD", "JUMP", "PNUM", "PCHR", "SWAP", "ADD" , "SUB" , "MUL" , "END" , "IJMP", 
                                                   "GJMP", "omit", "PSWP", "NLIN", "iadd", "isub", "imul", "COPY", "iijp", "igjp", 
                                                   "UJMP", "iujp", "DIV" , "idiv", "MOD" , "imod", "PCPY", "READ", "WRIT", "RAND", 
-                                                  "SPAC", "CALL", "RTN" , "ERR" , "ISDL", "SCOL", "DRAW", "FLSH", "USKP", "iusk"};
+                                                  "SPAC", "CALL", "RTN" , "ERR" , "ISDL", "SCOL", "DRAW", "FLSH", "ISKP", "iisk",
+                                                  "USKP", "iusk", "GSKP", "igsk"};
 
-int iops[OPCODE_COUNT] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 23, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 39, 0};
+int iops[OPCODE_COUNT] = {0, 0, 0, 0, 0, 14, 15, 16, 0, 18, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 23, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 39, 0, 41, 0, 43, 0};
 
 char *grab_jump_point(char line[]) {
     char *jump_point = malloc(MAX_STRING_LENGTH);
@@ -172,14 +177,15 @@ struct opcode tokenize(char line[], char jump_point_names[][MAX_STRING_LENGTH], 
         }
     }
 
-    if (op.opcode == -1) {
-        for (int i = 0; i < jump_point_count; i++) {
-            if (strcmp(tokens[0], jump_point_names[i]) == 0) {
-                op.opcode = 31;
-                strcpy(tokens[1], jump_point_names[i]);
-            }
-        }
-    }
+    // DONT TOUCH! allowed the user to autofill CALL to jump_points, but it makes the code ugly...
+    // if (op.opcode == -1) {
+    //     for (int i = 0; i < jump_point_count; i++) {
+    //         if (strcmp(tokens[0], jump_point_names[i]) == 0) {
+    //             op.opcode = 31;
+    //             strcpy(tokens[1], jump_point_names[i]);
+    //         }
+    //     }
+    // }
 
     if (op.opcode == -1) {
         op.opcode = 33;
@@ -300,7 +306,7 @@ int main(int argc, char **argv) {
     }
 
     
-    file = fopen("test.mbin", "wb");
+    file = fopen(argv[2], "wb");
 
     for (int i = 0; i < line_count; i++) {
         strcpy(line, code[i]);

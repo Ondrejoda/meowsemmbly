@@ -7,7 +7,7 @@
 #define VERBOSE 0
 #define VERBOSEJP 0
 
-#define REGISTRY_SIZE 256
+#define REGISTER_SIZE 256
 #define MEMORY_SIZE 65535
 #define CALL_STACK_SIZE 1024
 
@@ -50,11 +50,15 @@ enum opcodes {
     OP_SCOL,
     OP_DRAW,
     OP_FLSH,
+    OP_ISKP,
+    OP_IISK,
     OP_USKP,
-    OP_IUSK
+    OP_IUSK,
+    OP_GSKP,
+    OP_IGSK
 };
 
-int registers[REGISTRY_SIZE];
+int registers[REGISTER_SIZE];
 int memory[MEMORY_SIZE];
 
 int call_stack[CALL_STACK_SIZE];    
@@ -325,7 +329,7 @@ int execute_opcode(uint32_t code) {
         return 0;
     case OP_ERR:
         if (VERBOSE) {printf("OP_ERR\n");}
-        printf("oops! something went wrong (you probably tried to use an opcode that doesnt exist, call a function you didnt declare or use an alias you didnt declare either...)\n");
+        printf("oops! something went wrong (you probably tried to use an opcode that doesnt exist or use an alias you didnt declare...)\n");
         return 1;
     case OP_ISDL:
         if (VERBOSE) {printf("OP_ISDL\n");}
@@ -339,16 +343,28 @@ int execute_opcode(uint32_t code) {
         return 0;
     case OP_SCOL:
         if (VERBOSE) {printf("OP_SCOL\n");}
+        if (window == NULL) {
+            printf("SDL not present!\n");
+            return 1;
+        }
         SDL_SetRenderDrawColor(renderer, registers[arg1], registers[arg2], registers[arg3], 255);
         code_index++;
         return 0;
     case OP_DRAW:
         if (VERBOSE) {printf("OP_DRAW\n");}
+        if (window == NULL) {
+            printf("SDL not present!\n");
+            return 1;
+        }
         SDL_RenderDrawPoint(renderer, registers[arg1], registers[arg2]);
         code_index++;
         return 0;
     case OP_FLSH:
         if (VERBOSE) {printf("OP_FLSH\n");}
+        if (window == NULL) {
+            printf("SDL not present!\n");
+            return 1;
+        }
         SDL_RenderPresent(renderer);
 
         SDL_Event event;
@@ -359,12 +375,30 @@ int execute_opcode(uint32_t code) {
         }
         code_index++;
         return 0;
+    case OP_ISKP:
+        if (VERBOSE) {printf("OP_ISKP\n");}
+        if (registers[arg1] == registers[arg2]) {
+            code_index++;
+            code_index++;
+        } else {
+            code_index++;
+        }
+        return 0;
+    case OP_IISK:
+        if (VERBOSE) {printf("OP_IISK\n");}
+        if (registers[arg1] == arg2) {
+            code_index++;
+            code_index++;
+        } else {
+            code_index++;
+        }
+        return 0;
     case OP_USKP:
         if (VERBOSE) {printf("OP_USKP\n");}
         if (registers[arg1] != registers[arg2]) {
             code_index++;
-        } else {
             code_index++;
+        } else {
             code_index++;
         }
         return 0;
@@ -372,8 +406,26 @@ int execute_opcode(uint32_t code) {
         if (VERBOSE) {printf("OP_IUSK\n");}
         if (registers[arg1] != arg2) {
             code_index++;
+            code_index++;
         } else {
             code_index++;
+        }
+        return 0;
+    case OP_GSKP:
+        if (VERBOSE) {printf("OP_GSKP\n");}
+        if (registers[arg1] > registers[arg2]) {
+            code_index++;
+            code_index++;
+        } else {
+            code_index++;
+        }
+        return 0;
+    case OP_IGSK:
+        if (VERBOSE) {printf("OP_IGSK\n");}
+        if (registers[arg1] > arg2) {
+            code_index++;
+            code_index++;
+        } else {
             code_index++;
         }
         return 0;
