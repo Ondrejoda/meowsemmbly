@@ -1,9 +1,20 @@
 @ width 240
 @ height 241
 
+@ randmin_pos 251
+@ randmax_pos 252
+
+@ randmin_corner 253
+@ randmax_corner 254
+
 @ r 200
 @ g 201
 @ b 202
+
+@ loop 50
+@ loop2 51
+@ loopmax 52
+@ loop2max 53
 
 @ temp 210
 @ temp1 211
@@ -14,51 +25,192 @@
 @ temp6 216
 @ temp7 217
 @ temp8 218
-@ temp9 219
+
+@ corner0_x 100
+@ corner0_y 101
+@ corner1_x 102
+@ corner1_y 103
+@ corner2_x 104
+@ corner2_y 105
+
+@ sign_p1x 110
+@ sign_p1y 111
+@ sign_p2x 112
+@ sign_p2y 113
+@ sign_p3x 114
+@ sign_p3y 115
+
+@ sign_output 120
+
+@ d1 130
+@ d2 131
+@ d3 132
+
+@ has_neg 140
+@ has_pos 141
+
+@ pt_bool 145
+
+@ corner_x 245
+@ corner_y 246
+
+@ point_x 247
+@ point_y 248
 
 @ zero 0
 
-@ loop_x 220
-@ loop_y 221
+LOAD width 900
+LOAD height 900 
 
-@ loopmax_x 222
-@ loopmax_y 223
+LOAD randmin_pos 0
+COPY height randmax_pos
 
-LOAD width 700
-LOAD height 700 
+LOAD randmin_corner 0
+LOAD randmax_corner 2
+
+DIV height .2 corner0_x
+LOAD corner0_y 0
+
+LOAD corner1_x 0
+COPY height corner1_y
+
+COPY width corner2_x
+COPY height corner2_y
+
+LOAD loopmax 65535
+LOAD loop2max 5
 
 LOAD r 255
-LOAD g 0
+LOAD g 255
 LOAD b 255
 
 ISDL width height
 
+CALL determine_point
+
 : main
 
-LOAD temp 255
+// gives random corner of triangle on corner_x, corner_y
+CALL determine_corner
 
-DIV loop_x .3 r
-DIV loop_y .3 g
+ADD point_x corner_x point_x
+DIV point_x .2 point_x
 
-LOAD temp1 0
-
-ADD temp1 r temp1
-ADD temp1 g temp1
-
-DIV temp1 .2 temp1
-
-SUB temp temp1 b
-
+ADD point_y corner_y point_y
+DIV point_y .2 point_y
 
 SCOL r g b
-DRAW loop_x loop_y
+DRAW point_x point_y
 
-ADD loop_x .1 loop_x
-UJMP loop_x width main
+ADD loop .1 loop
+UJMP loop loopmax main
 
-LOAD loop_x 0
-ADD loop_y .1 loop_y
-UJMP loop_y height main
+LOAD loop 0
+ADD loop2 .1 loop2
+UJMP loop2 loop2max main
 
 FLSH
 END
+
+: determine_corner
+
+RAND randmin_corner randmax_corner temp
+
+IJMP temp .0 corner0
+IJMP temp .1 corner1
+IJMP temp .2 corner2
+
+: corner0
+
+COPY corner0_x corner_x
+COPY corner0_y corner_y
+JUMP dc_end
+
+: corner1
+
+COPY corner1_x corner_x
+COPY corner1_y corner_y
+JUMP dc_end
+
+: corner2
+
+COPY corner2_x corner_x
+COPY corner2_y corner_y
+
+: dc_end
+RTN
+
+
+: sign
+
+SUB sign_p1x sign_p3x temp1
+SUB sign_p2y sign_p3y temp2
+SUB sign_p2x sign_p3x temp3
+SUB sign_p1y sign_p3y temp4
+
+MUL temp1 temp2 temp5
+MUL temp3 temp4 temp6
+SUB temp5 temp6 sign_output
+
+RTN
+
+: determine_point
+
+LOAD has_neg 0
+LOAD has_pos 0
+
+RAND 0 width point_x
+RAND 0 height point_y
+
+COPY point_x sign_p1x
+COPY point_y sign_p1y
+COPY corner0_x sign_p2x
+COPY corner0_y sign_p2y
+COPY corner1_x sign_p3x
+COPY corner1_y sign_p3y
+CALL sign
+COPY sign_output d1
+
+COPY point_x sign_p1x
+COPY point_y sign_p1y
+COPY corner1_x sign_p2x
+COPY corner1_y sign_p2y
+COPY corner2_x sign_p3x
+COPY corner2_y sign_p3y
+CALL sign
+COPY sign_output d2
+
+COPY point_x sign_p1x
+COPY point_y sign_p1y
+COPY corner2_x sign_p2x
+COPY corner2_y sign_p2y
+COPY corner0_x sign_p3x
+COPY corner0_y sign_p3y
+CALL sign
+COPY sign_output d3
+
+GJMP zero d1 has_negp
+GJMP zero d2 has_negp
+GJMP zero d3 has_negp
+
+GJMP d1 zero has_posp
+GJMP d2 zero has_posp
+GJMP d3 zero has_posp
+
+: has_negp
+
+LOAD has_neg 1
+JUMP dp_end
+
+: has_posp
+
+LOAD has_pos 1
+JUMP dp_end
+
+: dp_end
+
+ADD has_neg has_pos pt_bool
+
+IJMP pt_bool .2 determine_point
+
+RTN

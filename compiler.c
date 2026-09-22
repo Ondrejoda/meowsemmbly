@@ -304,7 +304,6 @@ int main(int argc, char **argv) {
             alias_index++;
         }
     }
-
     
     file = fopen(argv[2], "wb");
 

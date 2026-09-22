@@ -448,7 +448,6 @@ int main(int argc, char **argv) {
     fread(code, 4, size / 4, file);
     fclose(file);
 
-
     int stop = 0;
     while (!stop)
     {
